@@ -30,3 +30,49 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+// ユーザー報酬ゲーム進行状況
+model UserReward {
+  id           String    @id @default(cuid())
+  sessionId    String    @unique
+  shop         String
+  currentRound Int       @default(1)
+  totalAmount  Int       @default(0)
+  couponCode   String?
+  expiresAt    DateTime?
+  isUsed       Boolean   @default(false)
+  isCompleted  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  rounds GameRound[]
+
+  @@index([shop])
+  @@index([sessionId])
+}
+
+// 各ラウンドの結果
+model GameRound {
+  id          String     @id @default(cuid())
+  rewardId    String
+  reward      UserReward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  roundNumber Int
+  result      Int
+  timestamp   DateTime   @default(now())
+
+  @@index([rewardId])
+}
+
+// クーポン使用履歴
+model CouponUsage {
+  id          String    @id @default(cuid())
+  couponCode  String    @unique
+  shop        String
+  sessionId   String
+  orderNumber String?
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([shop])
+  @@index([couponCode])
+}
